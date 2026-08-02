@@ -11,4 +11,6 @@ public interface ProductService {
 	Optional<Product> getProductById(Long id);
 
 	Optional<Product> getProductByName(String name);
+
+	Product addProduct(Product product);
 }

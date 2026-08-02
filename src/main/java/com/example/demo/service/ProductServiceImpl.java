@@ -11,11 +11,12 @@ import com.example.demo.entity.Product;
 @Service
 public class ProductServiceImpl implements ProductService {
 	private final List<Product> products = new ArrayList<>();
+	private Long id = 1L;
 
 	public ProductServiceImpl() {
-		products.add(new Product(1L, "Laptop Dell XPS 15", 25000000, 10));
-		products.add(new Product(2L, "iPhone 16 Pro Max", 35000000, 5));
-		products.add(new Product(3L, "Tai nghe Sony WH-1000XM5", 7000000, 20));
+		products.add(new Product(id++, "Laptop Dell XPS 15", 25000000, 10));
+		products.add(new Product(id++, "iPhone 16 Pro Max", 35000000, 5));
+		products.add(new Product(id++, "Tai nghe Sony WH-1000XM5", 7000000, 20));
 	}
 
 	@Override
@@ -36,5 +37,13 @@ public class ProductServiceImpl implements ProductService {
 				.filter(p -> p.getProductName().toLowerCase().contains(name.toLowerCase())).findFirst();
 
 		return found;
+	}
+
+	@Override
+	public Product addProduct(Product product) {
+		product.setId(id++);
+		products.add(product);
+
+		return product;
 	}
 }
