@@ -14,9 +14,9 @@ public class ProductServiceImpl implements ProductService {
 	private Long id = 1L;
 
 	public ProductServiceImpl() {
-		products.add(new Product(id++, "Laptop Dell XPS 15", 25000000, 10));
-		products.add(new Product(id++, "iPhone 16 Pro Max", 35000000, 5));
-		products.add(new Product(id++, "Tai nghe Sony WH-1000XM5", 7000000, 20));
+		products.add(new Product(id++, "Laptop Dell XPS 15", 25000000.0, 10));
+		products.add(new Product(id++, "iPhone 16 Pro Max", 35000000.0, 5));
+		products.add(new Product(id++, "Tai nghe Sony WH-1000XM5", 7000000.0, 20));
 	}
 
 	@Override
@@ -45,5 +45,21 @@ public class ProductServiceImpl implements ProductService {
 		products.add(product);
 
 		return product;
+	}
+
+	@Override
+	public Product updateProduct(Long id, Product product) {
+		Product existing = products.stream().filter(p -> p.getId() == id).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Id not found"));
+
+		if (product.getPrice() < 0) {
+			throw new IllegalArgumentException("Negative price value");
+		}
+
+		existing.setPrice(product.getPrice());
+		existing.setProductName(product.getProductName());
+		existing.setQuantity(product.getQuantity());
+
+		return existing;
 	}
 }

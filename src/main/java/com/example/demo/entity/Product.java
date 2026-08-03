@@ -34,7 +34,7 @@ public class Product {
 		this.productName = productName;
 	}
 
-	public double getPrice() {
+	public Double getPrice() {
 		return price;
 	}
 
@@ -42,7 +42,7 @@ public class Product {
 		this.price = price;
 	}
 
-	public int getQuantity() {
+	public Integer getQuantity() {
 		return quantity;
 	}
 
