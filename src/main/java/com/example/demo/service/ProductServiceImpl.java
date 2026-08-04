@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Product;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
 	private final List<Product> products = new ArrayList<>();
@@ -61,5 +64,13 @@ public class ProductServiceImpl implements ProductService {
 		existing.setQuantity(product.getQuantity());
 
 		return existing;
+	}
+
+	@Override
+	public boolean deleteProduct(Long id) {
+		boolean result = products.removeIf(p -> p.getId().equals(id));
+		log.debug("{}", result);
+
+		return result;
 	}
 }

@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.entity.Product;
 import com.example.demo.service.ProductServiceImpl;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
@@ -57,6 +61,22 @@ public class ProductController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
 		return ResponseEntity.ok().body(productServiceImpl.updateProduct(id, product));
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteProduct(@PathVariable Long id) {
+		log.info("DELETE HTTP /products/{}", id);
+		if (id <= 0) {
+			return ResponseEntity.badRequest().body("message: id=" + id + " không hợp lệ");
+		}
+
+		boolean result = productServiceImpl.deleteProduct(id);
+
+		if (result) {
+			return ResponseEntity.ok().body("message: Đã xóa sản phẩm: " + id);
+		}
+
+		return ResponseEntity.notFound().build();
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
