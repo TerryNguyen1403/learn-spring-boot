@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.User;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.UserRepository;
 
 @Service
@@ -20,7 +21,7 @@ public class UserService {
 	public User createUser(User request) {
 		// throw error if email is existed
 		if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
-			throw new IllegalArgumentException("Email is already existed: " + request.getEmail());
+			throw new ResourceNotFoundException("Email is already existed: " + request.getEmail());
 
 		}
 
@@ -70,7 +71,7 @@ public class UserService {
 	// Delete
 	public void deleteUser(Long id) {
 		if (!userRepository.existsById(id)) {
-			throw new IllegalArgumentException("Id not found");
+			throw new ResourceNotFoundException("Id not found");
 		}
 		userRepository.deleteById(id);
 	}
@@ -78,5 +79,16 @@ public class UserService {
 	// GET COUNT
 	public Long getCount() {
 		return userRepository.count();
+	}
+
+	// FIND BY NAME
+	public User findByName(String name) {
+		return userRepository.findByName(name)
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid name: " + name));
+	}
+
+	// FIND BY KEYWORD
+	public List<User> findByKeyword(String keyword) {
+		return userRepository.findByNameContainingIgnoreCase(keyword);
 	}
 }
