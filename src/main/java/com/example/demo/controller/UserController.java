@@ -2,6 +2,9 @@ package com.example.demo.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,8 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.UserDTO;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 
@@ -35,8 +40,8 @@ public class UserController {
 
 	// GET ALL
 	@GetMapping
-	public List<User> getAll() {
-		return userService.getAllUsers();
+	public Page<UserDTO> getAll(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
+		return userService.getAllUsers(pageable);
 	}
 
 	// GET BY ID
@@ -69,5 +74,17 @@ public class UserController {
 	@GetMapping("/count")
 	public Long getCount() {
 		return userService.getCount();
+	}
+
+	// FIND BY NAME
+	@GetMapping("/name")
+	public ResponseEntity<User> findByName(@RequestParam String name) {
+		return ResponseEntity.ok(userService.findByName(name));
+	}
+
+	// FIND BY KEYWORD
+	@GetMapping("/keyword")
+	public ResponseEntity<List<User>> findByKeyword(@RequestParam String keyword) {
+		return ResponseEntity.ok(userService.findByKeyword(keyword));
 	}
 }
