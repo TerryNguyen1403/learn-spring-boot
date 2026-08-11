@@ -2,6 +2,7 @@ package com.example.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -56,5 +57,22 @@ public class UserRepositoryTest {
 
 		// Assert
 		assertThat(found).isEmpty();
+	}
+
+	@Test
+	void findByNameContaining_whenTrue_shouldReturnListOfUsers() {
+		// Arrange
+		User user1 = new User("Nguyen Van A", "nguyenvana@gmail.com", "0988677456");
+		User user2 = new User("Nguyen Van B", "nguyenvanb@gmail.com", "0988677456");
+		User user3 = new User("Tran Van C", "tranvanc@gmail.com", "0988677456");
+		testEntityManager.persistAndFlush(user1);
+		testEntityManager.persistAndFlush(user2);
+		testEntityManager.persistAndFlush(user3);
+
+		// Act
+		List<User> found = userRepository.findByNameContainingIgnoreCase("Nguyen");
+
+		// Assert: should return 2
+		assertThat(found.size()).isEqualTo(2);
 	}
 }
