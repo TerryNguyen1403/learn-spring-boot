@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.demo.entity.Order;
 import com.example.demo.entity.User;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.UserRepository;
 
@@ -27,6 +28,13 @@ public class OrderService {
 		// If user exist
 		request.setUser(user);
 		return orderRepository.save(request);
+	}
+
+	public List<Order> getByUserId(Long userId) {
+		userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+		List<Order> found = orderRepository.findByUserId(userId);
+
+		return found;
 	}
 
 	public List<Order> getOrdersByUser(Long userId) {

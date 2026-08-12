@@ -39,4 +39,9 @@ public class OrderController {
 			@RequestParam String status) {
 		return ResponseEntity.ok().body(orderService.getOrdersByUserIdAndStatus(userId, status));
 	}
+
+	@GetMapping
+	public ResponseEntity<List<Order>> getOrderByUserId(@RequestParam Long userId) {
+		return ResponseEntity.ok(orderService.getByUserId(userId));
+	}
 }
