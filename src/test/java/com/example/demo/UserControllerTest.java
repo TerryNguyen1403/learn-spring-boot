@@ -44,4 +44,24 @@ public class UserControllerTest {
 				MockMvcRequestBuilders.post("/api/users").content(validJson).contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isCreated());
 	}
+
+	@Test
+	void createUser_whenPasswordIsInvalid_return400() throws Exception {
+		// Arrange
+		String invalidJson = """
+					{
+				    "name": "Giang",
+				    "email": "giang@gmail.com",
+				    "password": "12"
+				}
+				""";
+
+		// Act + Assert
+		mockMvc.perform(
+				MockMvcRequestBuilders.post("/api/users").content(invalidJson).contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isBadRequest())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.statusCode").value(400))
+				.andExpect(MockMvcResultMatchers.jsonPath("$.errors.password")
+						.value("Password must have at least 6 characters; 1 lower case; 1 upper case; "));
+	}
 }
