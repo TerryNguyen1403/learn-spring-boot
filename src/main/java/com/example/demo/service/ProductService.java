@@ -6,15 +6,19 @@ import java.util.Optional;
 import com.example.demo.entity.Product;
 
 public interface ProductService {
-	List<Product> getAllProducts();
+	List<Product> findAll();
 
-	Optional<Product> getProductById(Long id);
+	Optional<Product> findById(Long id);
 
-	Optional<Product> getProductByName(String name);
+	Product add(Product product);
 
-	Product addProduct(Product product);
+	Optional<Product> update(Long id, Product product);
 
-	Product updateProduct(Long id, Product product);
+	boolean delete(Long id);
 
-	boolean deleteProduct(Long id);
+	long getCount();
+
+	List<Product> findByName(String keyword);
+
+	List<Product> findByPriceRange(double min, double max);
 }

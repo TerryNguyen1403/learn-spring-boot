@@ -9,14 +9,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 	@ExceptionHandler(UserNotFoundException.class)
-	public ResponseEntity<ErrorResponse> userNotFoundExceptionHandler(UserNotFoundException e) {
-		ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage());
+	public ResponseEntity<ErrorResponse> userNotFoundExceptionHandler(UserNotFoundException e,
+			HttpServletRequest request) {
+		ErrorResponse error = new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage(), request.getRequestURI());
 		return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
 	}
 
@@ -32,9 +35,42 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
 	}
 
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ErrorResponse> illegalArgumentExceptionHandler(IllegalArgumentException e,
+			HttpServletRequest request) {
+		ErrorResponse body = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), request.getRequestURI());
+
+		return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(EmailAlreadyExistsException.class)
+	public ResponseEntity<ErrorResponse> emailAlreadyExistsExceptionHandler(EmailAlreadyExistsException e,
+			HttpServletRequest request) {
+		ErrorResponse body = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), request.getRequestURI());
+
+		return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ErrorResponse> constraintViolationExceptionHandler(ConstraintViolationException e,
+			HttpServletRequest request) {
+		ErrorResponse body = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), e.getMessage(), request.getRequestURI());
+
+		return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(DuplicateUserException.class)
+	public ResponseEntity<ErrorResponse> duplicateUserExceptionHandler(DuplicateUserException e,
+			HttpServletRequest request) {
+		ErrorResponse body = new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage(), request.getRequestURI());
+
+		return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+	}
+
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ErrorResponse> exceptionHandler(Exception e) {
-		ErrorResponse body = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal error");
+	public ResponseEntity<ErrorResponse> exceptionHandler(Exception e, HttpServletRequest request) {
+		ErrorResponse body = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal error",
+				request.getRequestURI());
 
 		log.error("Unhandle {}", e);
 		return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);

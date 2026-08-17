@@ -4,60 +4,67 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
-import com.example.demo.dto.UserDTO;
-import com.example.demo.entity.Log;
+import com.example.demo.dto.UserCreateDTO;
+import com.example.demo.dto.UserPatchDTO;
+import com.example.demo.dto.UserResponseDTO;
 import com.example.demo.entity.User;
+import com.example.demo.exception.EmailAlreadyExistsException;
 import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.ActivityLogRepository;
+import com.example.demo.exception.UserNotFoundException;
 import com.example.demo.repository.UserRepository;
 
+import jakarta.validation.constraints.Size;
+
 @Service
+@Validated
 public class UserService {
 	private final UserRepository userRepository;
-	private final ActivityLogRepository activityLogRepository;
+	private final PasswordEncoder passwordEncoder;
 
 	// Constructor injection
-	public UserService(UserRepository userRepository, ActivityLogRepository activityLogRepository) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
-		this.activityLogRepository = activityLogRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	// CREATE
 	@Transactional
-	public User createUser(User request) {
+	public UserResponseDTO createUser(UserCreateDTO request) {
 		// throw error if email is existed
-		if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
-			throw new ResourceNotFoundException("Email is already existed: " + request.getEmail());
+		if (userRepository.existsByEmail(request.email().toLowerCase())) {
+			throw new EmailAlreadyExistsException("Email is already existed: " + request.email());
 
 		}
 
-		request.setEmail(request.getEmail().toLowerCase());
-		User saved = userRepository.save(request);
+		User user = new User();
+		user.setName(request.name());
+		user.setEmail(request.email());
+		String hashed = passwordEncoder.encode(request.password());
+		user.setPassword(hashed);
+		user.setRole(request.role());
+		user.setActive(request.isActive());
+		userRepository.save(user);
 
-		Log activityLog = new Log();
-		activityLog.setAction("CREATE_USER");
-		activityLog.setUser(request);
+		UserResponseDTO response = new UserResponseDTO(request.name(), request.email(), request.role(),
+				request.isActive());
 
-		if (request.getName().isBlank()) {
-			throw new IllegalArgumentException("Name field cannot be blank");
-		}
-
-		activityLogRepository.save(activityLog);
-
-		return saved;
+		return response;
 	}
 
 	// GET ALL
-	public Page<UserDTO> getAllUsers(Pageable pageable) {
-		return userRepository.findAll(pageable).map(user -> new UserDTO(user.getId(), user.getName(), user.getEmail()));
+	public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
+		return userRepository.findAll(pageable)
+				.map(user -> new UserResponseDTO(user.getName(), user.getEmail(), user.getRole(), user.isActive()));
 	}
 
 	// GET BY ID
 	public User getUserById(Long id) {
-		return userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Id not found: " + id));
+		return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Id not found: " + id));
 	}
 
 	// UPDATE
@@ -65,25 +72,22 @@ public class UserService {
 		User existing = getUserById(id);
 		existing.setEmail(request.getEmail());
 		existing.setName(request.getName());
-		existing.setPhoneNumber(request.getPhoneNumber());
+		existing.setPassword(request.getPassword());
 
 		return userRepository.save(existing);
 	}
 
 	// PATCH
-	public User patchUser(Long id, User request) {
+	@Transactional
+	public User patchUser(Long id, UserPatchDTO request) {
 		User existing = getUserById(id);
 
-		if (request.getEmail() != null) {
-			existing.setEmail(request.getEmail());
+		if (request.email() != null) {
+			existing.setEmail(request.email());
 		}
 
-		if (request.getName() != null) {
-			existing.setName(request.getName());
-		}
-
-		if (request.getPhoneNumber() != null) {
-			existing.setPhoneNumber(request.getPhoneNumber());
+		if (request.name() != null) {
+			existing.setName(request.name());
 		}
 
 		return userRepository.save(existing);
@@ -103,9 +107,9 @@ public class UserService {
 	}
 
 	// FIND BY NAME
-	public User findByName(String name) {
-		return userRepository.findByName(name)
-				.orElseThrow(() -> new ResourceNotFoundException("Invalid name: " + name));
+	public User findByName(
+			@Size(min = 3, max = 20, message = "Name must be in range between 3 and 20 characters") String name) {
+		return userRepository.findByName(name).orElseThrow(() -> new UserNotFoundException("Invalid name: " + name));
 	}
 
 	// FIND BY KEYWORD

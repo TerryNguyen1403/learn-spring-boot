@@ -1,76 +1,64 @@
 package com.example.demo.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Product;
+import com.example.demo.repository.ProductRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
-	private final List<Product> products = new ArrayList<>();
-	private Long id = 1L;
+	private final ProductRepository productRepository;
 
-	public ProductServiceImpl() {
-		products.add(new Product(id++, "Laptop Dell XPS 15", 25000000.0, 10));
-		products.add(new Product(id++, "iPhone 16 Pro Max", 35000000.0, 5));
-		products.add(new Product(id++, "Tai nghe Sony WH-1000XM5", 7000000.0, 20));
+	public ProductServiceImpl(ProductRepository productRepository) {
+		this.productRepository = productRepository;
 	}
 
 	@Override
-	public List<Product> getAllProducts() {
-		return products;
+	public List<Product> findAll() {
+		return productRepository.findAll();
 	}
 
 	@Override
-	public Optional<Product> getProductById(Long id) {
-		Optional<Product> found = products.stream().filter(p -> p.getId().equals(id)).findFirst();
-
-		return found;
+	public Optional<Product> findById(Long id) {
+		return productRepository.findById(id);
 	}
 
 	@Override
-	public Optional<Product> getProductByName(String name) {
-		Optional<Product> found = products.stream()
-				.filter(p -> p.getProductName().toLowerCase().contains(name.toLowerCase())).findFirst();
-
-		return found;
+	public Product add(Product product) {
+		product.setId(null);
+		return productRepository.save(product);
 	}
 
 	@Override
-	public Product addProduct(Product product) {
-		product.setId(id++);
-		products.add(product);
-
-		return product;
+	public Optional<Product> update(Long id, Product product) {
+		return productRepository.update(id, product);
 	}
 
 	@Override
-	public Product updateProduct(Long id, Product product) {
-		Product existing = products.stream().filter(p -> p.getId() == id).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Id not found"));
-
-		if (product.getPrice() < 0) {
-			throw new IllegalArgumentException("Negative price value");
-		}
-
-		existing.setPrice(product.getPrice());
-		existing.setProductName(product.getProductName());
-		existing.setQuantity(product.getQuantity());
-
-		return existing;
+	public boolean delete(Long id) {
+		return productRepository.deleteById(id);
 	}
 
 	@Override
-	public boolean deleteProduct(Long id) {
-		boolean result = products.removeIf(p -> p.getId().equals(id));
-		log.debug("{}", result);
+	public long getCount() {
+		return productRepository.count();
+	}
 
-		return result;
+	@Override
+	public List<Product> findByName(String keyword) {
+		return productRepository.findByNameContaining(keyword);
+	}
+
+	@Override
+	public List<Product> findByPriceRange(double min, double max) {
+		List<Product> valid = productRepository.findByPriceRange(min, max);
+
+		return valid;
 	}
 }

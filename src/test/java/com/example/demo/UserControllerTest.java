@@ -28,7 +28,7 @@ public class UserControllerTest {
 	@Test
 	void createUser_whenValid_returnUser() throws Exception {
 		// Arrange
-		User created = new User("Giang", "giang@gmail.com", "123456Abc!@#");
+		User created = new User(1L, "Giang", "giang@gmail.com", "123456Abc!@#", "ADMIN");
 		when(userService.createUser(any(UserCreateDTO.class))).thenReturn(created);
 
 		// Act + Assert

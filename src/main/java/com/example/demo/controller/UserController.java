@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,12 +19,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.demo.dto.UserDTO;
+import com.example.demo.dto.UserCreateDTO;
+import com.example.demo.dto.UserPatchDTO;
+import com.example.demo.dto.UserResponseDTO;
 import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+
 @RestController
 @RequestMapping("/api/users")
+@Validated
 public class UserController {
 	private final UserService userService;
 
@@ -34,13 +41,13 @@ public class UserController {
 
 	// CREATE
 	@PostMapping
-	public ResponseEntity<User> create(@RequestBody User request) {
+	public ResponseEntity<UserResponseDTO> create(@Valid @RequestBody UserCreateDTO request) {
 		return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
 	}
 
 	// GET ALL
 	@GetMapping
-	public Page<UserDTO> getAll(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
+	public Page<UserResponseDTO> getAll(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
 		return userService.getAllUsers(pageable);
 	}
 
@@ -58,7 +65,7 @@ public class UserController {
 
 	// PATCH
 	@PatchMapping("/{id}")
-	public User patch(@PathVariable Long id, @RequestBody User request) {
+	public User patch(@PathVariable Long id, @Valid @RequestBody UserPatchDTO request) {
 		return userService.patchUser(id, request);
 	}
 
@@ -78,7 +85,7 @@ public class UserController {
 
 	// FIND BY NAME
 	@GetMapping("/name")
-	public ResponseEntity<User> findByName(@RequestParam String name) {
+	public ResponseEntity<User> findByName(@RequestParam @NotBlank String name) {
 		return ResponseEntity.ok(userService.findByName(name));
 	}
 

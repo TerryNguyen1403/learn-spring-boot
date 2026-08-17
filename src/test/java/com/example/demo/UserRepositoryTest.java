@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
@@ -24,7 +26,7 @@ public class UserRepositoryTest {
 	@Test
 	void save_ShouldPersistUserAndGeneratedId() {
 		// Arrange
-		User user = new User("Nguyen Van A", "nguyenvana@gmail.com", "0988677456");
+		User user = new User(1L, "Nguyen Van A", "nguyenvana@gmail.com", "testpassword", "USER");
 
 		// Act
 		User saved = userRepository.save(user);
@@ -37,7 +39,7 @@ public class UserRepositoryTest {
 	@Test
 	void findByName_whenValid_shouldReturnUser() {
 		// Arrange
-		User user = new User("Nguyen Van A", "nguyenvana@gmail.com", "0988677456");
+		User user = new User(1L, "Nguyen Van A", "nguyenvana@gmail.com", "0988677456", "ADMIN");
 		testEntityManager.persistAndFlush(user);
 
 		// Act
@@ -62,9 +64,9 @@ public class UserRepositoryTest {
 	@Test
 	void findByNameContaining_whenTrue_shouldReturnListOfUsers() {
 		// Arrange
-		User user1 = new User("Nguyen Van A", "nguyenvana@gmail.com", "0988677456");
-		User user2 = new User("Nguyen Van B", "nguyenvanb@gmail.com", "0988677456");
-		User user3 = new User("Tran Van C", "tranvanc@gmail.com", "0988677456");
+		User user1 = new User(1L, "Nguyen Van A", "nguyenvana@gmail.com", "0988677456", "USER");
+		User user2 = new User(2L, "Nguyen Van B", "nguyenvanb@gmail.com", "0988677456", "USER");
+		User user3 = new User(3L, "Tran Van C", "tranvanc@gmail.com", "0988677456", "ADMIN");
 		testEntityManager.persistAndFlush(user1);
 		testEntityManager.persistAndFlush(user2);
 		testEntityManager.persistAndFlush(user3);
@@ -74,5 +76,20 @@ public class UserRepositoryTest {
 
 		// Assert: should return 2
 		assertThat(found.size()).isEqualTo(2);
+	}
+
+	@Test
+	void whenEmailIsDuplicate_shouldThrowException() {
+		// Arrange
+		User user1 = new User(1L, "Nguyen Van A", "nguyenvana@gmail.com", "0988677456", "ADMIN");
+		userRepository.saveAndFlush(user1);
+
+		User user2 = new User(1L, "Nguyen Van B", "nguyenvana@gmail.com", "0988677456", "ADMIN");
+
+		// Act
+
+		// Assert
+		assertThrows(DataIntegrityViolationException.class, () -> userRepository.saveAndFlush(user2));
+
 	}
 }

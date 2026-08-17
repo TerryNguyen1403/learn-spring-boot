@@ -6,63 +6,27 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 public class User {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
 	@Column(nullable = false, length = 100)
 	private String name;
-
 	@Column(nullable = false, unique = true, length = 150)
 	private String email;
-
-	@Column(name = "phone_number", length = 15)
-	private String phoneNumber;
-
-	public User() {
-	}
-
-	public User(String name, String email, String phoneNumber) {
-		this.name = name;
-		this.email = email;
-		this.phoneNumber = phoneNumber;
-	}
-
-	// Getters and setters
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getPhoneNumber() {
-		return phoneNumber;
-	}
-
-	public void setPhoneNumber(String phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
+	@Column(length = 60)
+	private String password;
+	@Column(nullable = false)
+	private String role;
+	@Column(nullable = false)
+	private boolean isActive;
 }
